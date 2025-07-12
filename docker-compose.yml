@@ -1,0 +1,28 @@
+services:
+  # Your FastAPI application service
+  app:
+    build: . # Build the Docker image from the Dockerfile in the current directory
+    ports:
+      # Map host port 666 to container port 666
+      - "666:666" # Your app will listen on 666 inside the container and be accessible on 666 on your host
+    volumes:
+      # Mount your local .env file into the container. This is useful during development
+      # This assumes .env is located at ./monitor/.env relative to your docker-compose.yml
+      - ./monitor/.env:/app/monitor/.env
+    # No depends_on: db anymore as db service is removed
+    environment:
+      # Explicitly set HOST and PORT for the app container to connect to the host's PostgreSQL.
+      # 'host.docker.internal' is a special DNS name that resolves to the host's IP address
+      # when using Docker Desktop (Windows/macOS).
+      # On Linux, you might need to find your host's actual IP address (e.g., `ip addr show docker0` or `hostname -I`)
+      # and use that instead of 'host.docker.internal'.
+      HOST: host.docker.internal # Connect to the host machine
+      PORT: 5432 # The default port for PostgreSQL on your host machine
+      # USER, PASSWORD, DEFAULT_DATABASE_NAME can still be read from the mounted .env.
+      # Ensure these match your local PostgreSQL setup.
+      # Example (if you want to explicitly set them here instead of .env):
+      # USER: jon
+      # PASSWORD: 3214
+      # DEFAULT_DATABASE_NAME: chessism
+    # The command is now directly in the Dockerfile
+    # command: ["./start.sh"] # This line is removed as start.sh logic is simplified
